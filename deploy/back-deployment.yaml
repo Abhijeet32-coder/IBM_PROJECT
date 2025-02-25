@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pharmacy-backend
+spec:
+  replicas: 1  
+  selector:
+    matchLabels:
+      app: pharmacy-backend
+  template:
+    metadata:
+      labels:
+        app: pharmacy-backend
+    spec:
+      containers:
+      - name: backend
+        image: icr.io/pharmaapp/pharmacy-backend:latest
+        ports:
+        - containerPort: 5000
+        env:
+        - name: MONGO_URI
+          valueFrom:
+            secretKeyRef:
+              name: mongo-uri-sec
+              key: mongo-uri
+      imagePullSecrets:
+      - name: cloud-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pharmacy-backend
+spec:
+  selector:
+    app: pharmacy-backend
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+  type: ClusterIP
